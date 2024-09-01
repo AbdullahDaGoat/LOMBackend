@@ -26,7 +26,7 @@ export async function submitHandler(req: Request, res: Response) {
     // Handle POST requests
     limiter(req, res, async () => {
         if (req.method === 'POST') {
-            const { access_key, from_name, replyto, botCheck, Origin, ...formData } = req.body;
+            const {from_name, replyto, botCheck, Origin, ...formData } = req.body;
 
             // Check if botCheck input value is checked (if it is return invalid submission)
             if (botCheck) {
