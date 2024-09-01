@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 // Setup rate limiter
 const limiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
-    max: 1000, // Limit each IP to 1000 requests per windowMs
+    max: 2, 
     message: 'You can only submit once every 24 hours.',
 });
 
@@ -98,27 +98,23 @@ export async function submitHandler(req: Request, res: Response) {
                 return res.status(400).json({ message: errors });
             }
 
-            // Determine the origin of the submission
-            const originText = Origin ? Origin : 'Unknown Origin';
-            console.log('Submission origin:', originText);
+            // Remove h-captcha-response
+            delete formData['h-captcha-response'];
 
-            // Create the email body with a personalized banner
-            const emailBody = `
-                <div style="padding: 20px; background-color: #f4f4f4; text-align: center;">
-                    <h1 style="color: orange;">Legacies Of Men Form Submission Contact Area</h1>
-                    <p style="color: #555;">Thank you for reaching out! Below are the details of your submission:</p>
-                </div>
-                <div style="padding: 20px;">
-                    <pre>${JSON.stringify(formData, null, 2)}</pre>
-                </div>
-            `;
+            // Parse userInfo
+            if (formData.userInfo) {
+                formData.userInfo = parseUserInfo(formData.userInfo);
+            }
+
+            // Create the email body with improved styling
+            const emailBody = createEmailBody(formData, from_name, replyto, Origin);
 
             // Send the email with a custom subject based on the origin
             try {
                 await transporter.sendMail({
                     from: `${from_name} <${replyto}>`,
                     to: process.env.EMAIL_TO,
-                    subject: `Someone from the **${originText}** named ${from_name} is trying to reach us`,
+                    subject: `Someone from the **${Origin || 'Unknown Origin'}** named ${from_name} is trying to reach us`,
                     html: emailBody,
                 });
                 console.log('Email sent successfully');
@@ -132,4 +128,59 @@ export async function submitHandler(req: Request, res: Response) {
             return res.status(405).json({ message: 'Method not allowed' });
         }
     });
+}
+
+function parseUserInfo(userInfo: string): Record<string, string> {
+    const lines = userInfo.split(';');
+    const parsedInfo: Record<string, string> = {}; 
+    lines.forEach(line => {
+        const [key, value] = line.split(':').map(item => item.trim());
+        if (key && value) {
+            parsedInfo[key] = value;
+        }
+    });
+    return parsedInfo;
+}
+
+function createEmailBody(formData: any, from_name: string, replyto: string, Origin: string): string {
+    const formFields = Object.entries(formData).map(([key, value]) => {
+        if (typeof value === 'object') {
+            return `
+                <tr>
+                    <td style="font-weight: bold; padding: 10px; border-bottom: 1px solid #ddd;">${key}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+                        <pre style="margin: 0; white-space: pre-wrap;">${JSON.stringify(value, null, 2)}</pre>
+                    </td>
+                </tr>
+            `;
+        }
+        return `
+            <tr>
+                <td style="font-weight: bold; padding: 10px; border-bottom: 1px solid #ddd;">${key}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #ddd;">${value}</td>
+            </tr>
+        `;
+    }).join('');
+
+    return `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background-color: #f4f4f4; padding: 20px; text-align: center;">
+                <h1 style="color: #ff6600; margin: 0;">Legacies Of Men Form Submission</h1>
+                <p style="color: #555;">Contact received from ${from_name} (${replyto})</p>
+            </div>
+            <div style="padding: 20px; background-color: #ffffff;">
+                <h2 style="color: #333;">Submission Details</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="font-weight: bold; padding: 10px; border-bottom: 1px solid #ddd;">Origin</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">${Origin || 'Unknown Origin'}</td>
+                    </tr>
+                    ${formFields}
+                </table>
+            </div>
+            <div style="background-color: #f4f4f4; padding: 20px; text-align: center; color: #777; font-size: 12px;">
+                <p>This is an automated message. Please do not reply directly to this email.</p>
+            </div>
+        </div>
+    `;
 }
