@@ -26,7 +26,7 @@ export async function submitHandler(req: Request, res: Response) {
     // Handle POST requests
     limiter(req, res, async () => {
         if (req.method === 'POST') {
-            const { access_key, from_name, replyto, botCheck, ...formData } = req.body;
+            const { access_key, from_name, replyto, botCheck, Origin, ...formData } = req.body;
 
             // Check if botCheck is filled out
             if (botCheck) {
@@ -61,10 +61,13 @@ export async function submitHandler(req: Request, res: Response) {
                 return res.status(400).json({ message: errors });
             }
 
+            // Determine the origin of the submission
+            const originText = Origin ? Origin : 'Unknown Origin';
+
             // Create the email body with a personalized banner
             const emailBody = `
                 <div style="padding: 20px; background-color: #f4f4f4; text-align: center;">
-                    <h1 style="color: #333;">Your Company Name</h1>
+                    <h1 style="color: orange;">Legacies Of Men Form Submission Contact Area</h1>
                     <p style="color: #555;">Thank you for reaching out! Below are the details of your submission:</p>
                 </div>
                 <div style="padding: 20px;">
@@ -72,12 +75,12 @@ export async function submitHandler(req: Request, res: Response) {
                 </div>
             `;
 
-            // Send the email
+            // Send the email with a custom subject based on the origin
             try {
                 await transporter.sendMail({
                     from: `${from_name} <${replyto}>`,
                     to: process.env.EMAIL_TO,
-                    subject: `New form submission from ${from_name}`,
+                    subject: `Someone from the **${originText}** named ${from_name} is trying to reach us`,
                     html: emailBody,
                 });
                 return res.status(200).json({ message: 'Form submitted successfully!' });
