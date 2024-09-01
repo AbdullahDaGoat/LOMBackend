@@ -63,6 +63,7 @@ export async function submitHandler(req: Request, res: Response) {
 
             // Determine the origin of the submission
             const originText = Origin ? Origin : 'Unknown Origin';
+            console.log(originText)
 
             // Create the email body with a personalized banner
             const emailBody = `
