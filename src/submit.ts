@@ -3,12 +3,14 @@ import rateLimit from 'express-rate-limit';
 import validator from 'validator';
 import { Request, Response } from 'express';
 
+// Setup rate limiter
 const limiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
-    max: 1000000000,
+    max: 1000, // Limit each IP to 1000 requests per windowMs
     message: 'You can only submit once every 24 hours.',
 });
 
+// Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -23,12 +25,17 @@ export async function submitHandler(req: Request, res: Response) {
         return res.redirect('/api/status');
     }
 
-    // Handle POST requests
+    // Log incoming request
+    console.log('Request method:', req.method);
+    console.log('Request body:', req.body);
+
+    // Handle POST requests with rate limiting
     limiter(req, res, async () => {
         if (req.method === 'POST') {
-            const {from_name, replyto, botCheck, Origin, ...formData } = req.body;
+            const { from_name, replyto, botCheck, Origin, ...formData } = req.body;
 
             // Check if botCheck input value is checked (if it is return invalid submission)
+            console.log('Bot check:', botCheck);
             if (botCheck) {
                 return res.status(400).json({ message: 'Invalid submission' });
             }
@@ -53,12 +60,13 @@ export async function submitHandler(req: Request, res: Response) {
 
             // Return validation errors if any
             if (errors.length > 0) {
+                console.log('Validation errors:', errors);
                 return res.status(400).json({ message: errors });
             }
 
             // Determine the origin of the submission
             const originText = Origin ? Origin : 'Unknown Origin';
-            console.log(originText)
+            console.log('Submission origin:', originText);
 
             // Create the email body with a personalized banner
             const emailBody = `
@@ -79,12 +87,14 @@ export async function submitHandler(req: Request, res: Response) {
                     subject: `Someone from the **${originText}** named ${from_name} is trying to reach us`,
                     html: emailBody,
                 });
+                console.log('Email sent successfully');
                 return res.status(200).json({ message: 'Form submitted successfully!' });
             } catch (error) {
-                console.error(error);
+                console.error('Error sending email:', error);
                 return res.status(500).json({ message: 'Failed to send email.' });
             }
         } else {
+            console.log('Method not allowed');
             return res.status(405).json({ message: 'Method not allowed' });
         }
     });
