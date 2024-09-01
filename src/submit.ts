@@ -32,7 +32,7 @@ export async function submitHandler(req: Request, res: Response) {
     // Handle POST requests with rate limiting
     limiter(req, res, async () => {
         if (req.method === 'POST') {
-            const { from_name, replyto, botCheck, Origin, ...formData } = req.body;
+            const { from_name, replyto, botCheck, Origin, selectedOption, selectedSubOption, ...formData } = req.body;
 
             // Check if botCheck input value is checked (if it is return invalid submission)
             console.log('Bot check:', botCheck);
@@ -53,9 +53,22 @@ export async function submitHandler(req: Request, res: Response) {
                 if (typeof value === 'string') {
                     formData[key] = validator.escape(value);
                     if (validator.isEmpty(formData[key])) {
-                        errors.push(`${key} cannot be empty.`);
+                        if (key !== 'optionalField') {
+                            errors.push(`${key} cannot be empty.`);
+                        }
                     }
                 }
+            }
+
+            // Conditional field validation
+            if (selectedOption === 'lawEnforcementContact' && (
+                !formData.lawEnforcementName || !formData.lawEnforcementAgency)) {
+                errors.push('Law enforcement name and agency are required for this option.');
+            }
+
+            if (selectedOption === 'pressReleasesAndBranding' && (
+                !formData.nameOfPress || !formData.nameOfIndividual || !formData.certifyRepresentation)) {
+                errors.push('Press details and certification are required for this option.');
             }
 
             // Return validation errors if any

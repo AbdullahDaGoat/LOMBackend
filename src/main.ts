@@ -6,6 +6,9 @@ import { statusHandler } from './status';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust the proxy
+app.set('trust proxy', 1); // Trust first proxy
+
 // Middleware to parse JSON bodies
 app.use(express.json());
 
