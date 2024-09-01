@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors'; 
 import { submitHandler } from './submit';
 import { statusHandler } from './status';
 
@@ -7,6 +8,12 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+app.use(cors({
+  origin: ['https://legaciesofmenv2.pages.dev/', 'https://legaciesofmen.org/'], 
+  methods: ['GET', 'POST'], 
+  credentials: true, 
+}));
 
 const apiRouter = express.Router();
 apiRouter.get('/submit', submitHandler);  // Register GET /api/submit

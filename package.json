@@ -8,6 +8,7 @@
     "start": "node dist/main.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.4.0",
     "my-vercel-project": "file:",
@@ -16,8 +17,9 @@
     "vue": "^3.4.38"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
-    "@types/node": "^22.5.1",
+    "@types/node": "^22.5.2",
     "@types/nodemailer": "^6.4.15",
     "@types/validator": "^13.12.1",
     "@vitejs/plugin-vue": "^5.1.3",
