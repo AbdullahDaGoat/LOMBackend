@@ -28,14 +28,9 @@ export async function submitHandler(req: Request, res: Response) {
         if (req.method === 'POST') {
             const { access_key, from_name, replyto, botCheck, Origin, ...formData } = req.body;
 
-            // Check if botCheck is filled out
+            // Check if botCheck input value is checked (if it is return invalid submission)
             if (botCheck) {
-                return res.status(403).json({ message: 'Bot check failed. Submission rejected.' });
-            }
-
-            // Validate the access key
-            if (access_key !== process.env.ACCESS_KEY) {
-                return res.status(403).json({ message: 'Invalid access key' });
+                return res.status(400).json({ message: 'Invalid submission' });
             }
 
             // Validate and sanitize inputs

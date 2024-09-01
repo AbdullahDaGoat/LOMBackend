@@ -18,8 +18,8 @@ app.use(cors({
 }));
 
 const apiRouter = express.Router();
-apiRouter.get('/submit', submitHandler);  // Register GET /api/submit
-apiRouter.post('/submit', submitHandler); // Register POST /api/submit
+apiRouter.get('/submit', submitHandler);  
+apiRouter.post('/submit', submitHandler);
 apiRouter.get('/status', statusHandler);
 
 app.use('/api', apiRouter);
