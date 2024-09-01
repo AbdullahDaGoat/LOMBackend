@@ -5,7 +5,7 @@ import { Request, Response } from 'express';
 
 const limiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
-    max: 1,
+    max: 1000000000,
     message: 'You can only submit once every 24 hours.',
 });
 
