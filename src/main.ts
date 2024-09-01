@@ -9,10 +9,12 @@ const PORT = process.env.PORT || 3000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+// Configure CORS
 app.use(cors({
-  origin: ['https://legaciesofmenv2.pages.dev/', 'https://legaciesofmen.org/'], 
+  origin: ['https://legaciesofmenv2.pages.dev', 'https://legaciesofmen.org'],
   methods: ['GET', 'POST'], 
   credentials: true, 
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 const apiRouter = express.Router();
@@ -27,8 +29,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-// Catch any unhandled errors and log them
 process.on('uncaughtException', err => {
   console.error('There was an uncaught error', err);
-  process.exit(1); // Mandatory (as per the Node.js docs)
+  process.exit(1); 
 });
