@@ -32,9 +32,12 @@ export async function submitHandler(req: Request, res: Response) {
     // Handle POST requests with rate limiting
     limiter(req, res, async () => {
         if (req.method === 'POST') {
-            const { from_name, replyto, botCheck, Origin, selectedOption, selectedSubOption, ...formData } = req.body;
+            let { from_name, replyto, botCheck, Origin, selectedOption, selectedSubOption, ...formData } = req.body;
 
-            // Check if botCheck input value is checked (if it is return invalid submission)
+            // Set botCheck to false if undefined
+            botCheck = botCheck || false;
+
+            // Check if botCheck input value is true (i.e., the bot check was triggered)
             console.log('Bot check:', botCheck);
             if (botCheck) {
                 return res.status(400).json({ message: 'Invalid submission' });
@@ -60,15 +63,33 @@ export async function submitHandler(req: Request, res: Response) {
                 }
             }
 
-            // Conditional field validation
-            if (selectedOption === 'lawEnforcementContact' && (
-                !formData.lawEnforcementName || !formData.lawEnforcementAgency)) {
-                errors.push('Law enforcement name and agency are required for this option.');
+            // Conditional field validation and auto-fill defaults
+            if (selectedOption === 'lawEnforcementContact') {
+                formData.lawEnforcementName = formData.lawEnforcementName || 'N/A';
+                formData.lawEnforcementAgency = formData.lawEnforcementAgency || 'N/A';
+
+                if (!formData.lawEnforcementName) {
+                    errors.push('Law enforcement name cannot be empty.');
+                }
+                if (!formData.lawEnforcementAgency) {
+                    errors.push('Law enforcement agency cannot be empty.');
+                }
             }
 
-            if (selectedOption === 'pressReleasesAndBranding' && (
-                !formData.nameOfPress || !formData.nameOfIndividual || !formData.certifyRepresentation)) {
-                errors.push('Press details and certification are required for this option.');
+            if (selectedOption === 'pressReleasesAndBranding') {
+                formData.nameOfPress = formData.nameOfPress || 'N/A';
+                formData.nameOfIndividual = formData.nameOfIndividual || 'N/A';
+                formData.certifyRepresentation = formData.certifyRepresentation || 'false';
+
+                if (!formData.nameOfPress) {
+                    errors.push('Name of press cannot be empty.');
+                }
+                if (!formData.nameOfIndividual) {
+                    errors.push('Name of individual cannot be empty.');
+                }
+                if (!formData.certifyRepresentation) {
+                    errors.push('Certification of representation cannot be empty.');
+                }
             }
 
             // Return validation errors if any
