@@ -32,7 +32,7 @@ export async function submitHandler(req: Request, res: Response) {
     // Handle POST requests with rate limiting
     limiter(req, res, async () => {
         if (req.method === 'POST') {
-            let { from_name, replyto, botCheck, Origin, selectedOption, selectedSubOption, ...formData } = req.body;
+            let { from_name, replyto, botCheck, Origin, selectedOption, selectedSubOption, firstName, ...formData } = req.body;
 
             // Set botCheck to false if undefined
             botCheck = botCheck || false;
@@ -45,12 +45,12 @@ export async function submitHandler(req: Request, res: Response) {
 
             // Validate and sanitize inputs
             const errors: string[] = [];
-            if (!validator.isLength(from_name, { min: 1, max: 100 })) {
-                errors.push('From name must be between 1 and 100 characters.');
+            if (!validator.isLength(firstName, { min: 1, max: 100 })) { // Validate firstName instead of from_name
+                errors.push('First name must be between 1 and 100 characters.');
             }
-            if (!validator.isEmail(replyto)) {
-                errors.push('Reply-to email is invalid.');
-            }
+
+            // Hardcode replyto to the desired email address
+            replyto = 'no-reply@LegaciesOfMen.ContactPage.Website.org';
 
             for (const [key, value] of Object.entries(formData)) {
                 if (typeof value === 'string') {
@@ -107,14 +107,14 @@ export async function submitHandler(req: Request, res: Response) {
             }
 
             // Create the email body with improved styling
-            const emailBody = createEmailBody(formData, from_name, replyto, Origin);
+            const emailBody = createEmailBody(formData, firstName, replyto, Origin);
 
-            // Send the email with a custom subject based on the origin
+            // Send the email with a custom subject based on the origin and firstName
             try {
                 await transporter.sendMail({
-                    from: `${from_name} <${replyto}>`,
+                    from: `${firstName} <${replyto}>`, // Use firstName instead of from_name
                     to: process.env.EMAIL_TO,
-                    subject: `Someone from the **${Origin || 'Unknown Origin'}** named ${from_name} is trying to reach us`,
+                    subject: `Someone from the User Contact Page named ${firstName} is trying to reach us`, // Use firstName in the subject
                     html: emailBody,
                 });
                 console.log('Email sent successfully');
@@ -142,7 +142,7 @@ function parseUserInfo(userInfo: string): Record<string, string> {
     return parsedInfo;
 }
 
-function createEmailBody(formData: any, from_name: string, replyto: string, Origin: string): string {
+function createEmailBody(formData: any, firstName: string, replyto: string, Origin: string): string {
     const formFields = Object.entries(formData).map(([key, value]) => {
         if (typeof value === 'object') {
             return `
@@ -166,7 +166,7 @@ function createEmailBody(formData: any, from_name: string, replyto: string, Orig
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background-color: #f4f4f4; padding: 20px; text-align: center;">
                 <h1 style="color: #ff6600; margin: 0;">Legacies Of Men Form Submission</h1>
-                <p style="color: #555;">Contact received from ${from_name} (${replyto})</p>
+                <p style="color: #555;">Contact received from ${firstName} (${replyto})</p>
             </div>
             <div style="padding: 20px; background-color: #ffffff;">
                 <h2 style="color: #333;">Submission Details</h2>
