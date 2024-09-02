@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 // Setup rate limiter
 const limiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
-    max: 2, 
+    max: 1, 
     message: 'You can only submit once every 24 hours.',
 });
 
@@ -112,7 +112,7 @@ export async function submitHandler(req: Request, res: Response) {
             // Send the email with a custom subject based on the origin and firstName
             try {
                 await transporter.sendMail({
-                    from: `${firstName} <${replyto}>`, // Use firstName instead of from_name
+                    from: `${from_name} <no-reply@LegaciesOfMen.ContactPage.Website.org>`, // Use firstName instead of from_name
                     to: process.env.EMAIL_TO,
                     subject: `Someone from the User Contact Page named ${firstName} is trying to reach us`, // Use firstName in the subject
                     html: emailBody,
