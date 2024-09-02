@@ -6,8 +6,8 @@ import { Request, Response } from 'express';
 // Setup rate limiter
 const limiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000, // 24 hours
-    max: 1, 
-    message: 'You can only submit once every 24 hours.',
+    max: 2, 
+    message: 'You can only submit once every 24 hours. ',
 });
 
 // Configure nodemailer transporter
