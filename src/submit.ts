@@ -132,15 +132,28 @@ export async function submitHandler(req: Request, res: Response) {
     });
 }
 
-function parseUserInfo(userInfo: string): Record<string, string> {
-    const lines = userInfo.split(';');
-    const parsedInfo: Record<string, string> = {}; 
-    lines.forEach(line => {
-        const [key, value] = line.split(':').map(item => item.trim());
-        if (key && value) {
-            parsedInfo[key] = value;
-        }
-    });
+function parseUserInfo(userInfo: string | Record<string, any>): Record<string, string> {
+    const parsedInfo: Record<string, string> = {};
+
+    if (typeof userInfo === 'string') {
+        // Handle the case where userInfo is a string
+        const lines = userInfo.split(';');
+        lines.forEach(line => {
+            const [key, value] = line.split(':').map(item => item.trim());
+            if (key && value) {
+                parsedInfo[key] = value;
+            }
+        });
+    } else if (typeof userInfo === 'object' && userInfo !== null) {
+        // Handle the case where userInfo is an object
+        Object.keys(userInfo).forEach(key => {
+            const value = userInfo[key];
+            if (value !== undefined && value !== null) {
+                parsedInfo[key] = String(value);
+            }
+        });
+    }
+
     return parsedInfo;
 }
 
