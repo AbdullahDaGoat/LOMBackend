@@ -12,6 +12,13 @@ app.set('trust proxy', 1); // Trust first proxy
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+app.options('/api/submit', cors({
+  origin: ['https://legaciesofmenv2.pages.dev', 'https://legaciesofmen.org'],
+  methods: ['GET', 'POST'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 // Configure CORS
 app.use(cors({
   origin: ['https://legaciesofmenv2.pages.dev', 'https://legaciesofmen.org'],
@@ -26,6 +33,11 @@ apiRouter.post('/submit', submitHandler);
 apiRouter.get('/status', statusHandler);
 
 app.use('/api', apiRouter);
+
+app.use((req, res, next) => {
+  console.log('Incoming request:', req.method, req.headers.origin);
+  next();
+});
 
 // Start the server and log a message when it's running
 app.listen(PORT, () => {

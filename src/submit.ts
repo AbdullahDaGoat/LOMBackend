@@ -20,6 +20,8 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function submitHandler(req: Request, res: Response) {
+
+    console.log('CORS headers:', res.getHeaders());
     // Redirect GET requests to /api/status
     if (req.method === 'GET') {
         return res.redirect('/api/status');
