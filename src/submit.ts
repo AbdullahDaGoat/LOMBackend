@@ -14,8 +14,8 @@ const limiter = rateLimit({
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER!,
+        pass: process.env.EMAIL_PASS!,
     },
 });
 
@@ -115,7 +115,7 @@ export async function submitHandler(req: Request, res: Response) {
             try {
                 await transporter.sendMail({
                     from: `${from_name} <no-reply@LegaciesOfMen.ContactPage.Website.org>`, // Use firstName instead of from_name
-                    to: process.env.EMAIL_TO,
+                    to: process.env.EMAIL_TO!,
                     subject: `Someone from the User Contact Page named ${firstName} is trying to reach us`, // Use firstName in the subject
                     html: emailBody,
                 });

@@ -1,7 +1,7 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors'; 
-import { submitHandler } from './submit';
-import { statusHandler } from './status';
+import { submitHandler } from './submit.js';
+import { statusHandler } from './status.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,7 +34,7 @@ apiRouter.get('/status', statusHandler);
 
 app.use('/api', apiRouter);
 
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   console.log('Incoming request:', req.method, req.headers.origin);
   next();
 });
@@ -44,7 +44,7 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-process.on('uncaughtException', err => {
+process.on('uncaughtException', (err: Error) => {
   console.error('There was an uncaught error', err);
   process.exit(1); 
 });
